@@ -224,31 +224,54 @@
 </footer>
 
 <script>
-    async function updateDashboard() {
-        try {
-            const response = await fetch("/api/status");
-            const data = await response.json();
+   async function updateDashboard() {
+    try {
+        const response = await fetch("/api/status");
+        const data = await response.json();
 
-            document.getElementById("system").textContent = data.system;
-            document.getElementById("ambulance").textContent =
-                data.ambulance_detected ? "Detected" : "Not Detected";
+        document.getElementById("system").textContent = data.system;
 
-            document.getElementById("traffic").textContent =
-                data.traffic_signal;
+        document.getElementById("ambulance").textContent =
+            data.ambulance_detected ? "Detected" : "Not Detected";
 
-            document.getElementById("lane").textContent =
-                data.current_lane;
+        document.getElementById("traffic").textContent =
+            data.traffic_signal;
 
-            document.getElementById("time").textContent =
-                data.remaining_time;
+        document.getElementById("lane").textContent =
+            data.current_lane;
 
-            document.getElementById("emergency").textContent =
-                data.emergency_active ? "Active" : "Inactive";
+        document.getElementById("time").textContent =
+            data.remaining_time;
 
-        } catch (error) {
-            document.getElementById("system").textContent = "Offline";
-        }
+        document.getElementById("emergency").textContent =
+            data.emergency_active ? "Active" : "Inactive";
+
+        // Update all four traffic signals
+        const lanes = ["north", "south", "east", "west"];
+
+        lanes.forEach(lane => {
+            const signal = data.lane_signals[
+                lane.charAt(0).toUpperCase() + lane.slice(1)
+            ];
+
+            const light = document.getElementById(lane);
+            const status = document.getElementById(lane + "Status");
+
+            light.className = "light";
+
+            if (signal === "GREEN") {
+                light.classList.add("active");
+                status.textContent = "GREEN";
+            } else {
+                status.textContent = "RED";
+            }
+        });
+
+    } catch (error) {
+        document.getElementById("system").textContent = "Offline";
+        console.error("Dashboard error:", error);
     }
+}
 
     updateDashboard();
     setInterval(updateDashboard, 2000);
