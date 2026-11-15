@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 import time
 
 app = FastAPI(
@@ -23,20 +24,21 @@ lanes = ["North", "South", "East", "West"]
 signal_duration = 30
 start_time = time.monotonic()
 
+emergency_active = False
+emergency_lane = None
+saved_signal_state = None
 
-def get_signal_status():
+
+class EmergencyRequest(BaseModel):
+    lane: str
+
+
+def get_normal_signal():
     elapsed = int(time.monotonic() - start_time)
     phase = (elapsed // signal_duration) % 4
     remaining = signal_duration - (elapsed % signal_duration)
 
-    current_lane = lanes[phase]
-
-    lane_signals = {
-        lane: "GREEN" if lane == current_lane else "RED"
-        for lane in lanes
-    }
-
-    return current_lane, remaining, lane_signals
+    return lanes[phase], remaining
 
 
 @app.get("/")
@@ -50,14 +52,84 @@ def home(request: Request):
 
 @app.get("/api/status")
 def system_status():
-    current_lane, remaining, lane_signals = get_signal_status()
+    if emergency_active:
+        current_lane = emergency_lane
+        remaining = 0
+
+    else:
+        current_lane, remaining = get_normal_signal()
+
+    lane_signals = {
+        lane: "GREEN" if lane == current_lane else "RED"
+        for lane in lanes
+    }
 
     return {
         "system": "Online",
-        "ambulance_detected": False,
-        "emergency_active": False,
+        "ambulance_detected": emergency_active,
+        "emergency_active": emergency_active,
         "traffic_signal": "GREEN",
         "current_lane": current_lane,
         "remaining_time": remaining,
         "lane_signals": lane_signals
+    }
+
+
+@app.post("/api/emergency/start")
+def start_emergency(data: EmergencyRequest):
+    global emergency_active, emergency_lane, saved_signal_state
+
+    if data.lane not in lanes:
+        return {"error": "Invalid lane"}
+
+    if emergency_active:
+        return {"message": "An emergency is already active"}
+
+    current_lane, remaining = get_normal_signal()
+
+    saved_signal_state = {
+        "lane": current_lane,
+        "remaining": remaining
+    }
+
+    emergency_lane = data.lane
+    emergency_active = True
+
+    return {
+        "message": "Emergency priority activated",
+        "priority_lane": emergency_lane,
+        "signal": "GREEN",
+        "saved_signal": saved_signal_state
+    }
+
+
+@app.post("/api/emergency/stop")
+def stop_emergency():
+    global emergency_active, emergency_lane
+    global saved_signal_state, start_time
+
+    if not emergency_active:
+        return {"message": "No emergency is active"}
+
+    saved_lane = saved_signal_state["lane"]
+    saved_remaining = saved_signal_state["remaining"]
+
+    phase = lanes.index(saved_lane)
+
+    elapsed_before_emergency = (
+        phase * signal_duration
+        + signal_duration
+        - saved_remaining
+    )
+
+    start_time = time.monotonic() - elapsed_before_emergency
+
+    emergency_active = False
+    emergency_lane = None
+    saved_signal_state = None
+
+    return {
+        "message": "Normal traffic signals restored",
+        "restored_lane": saved_lane,
+        "remaining_time": saved_remaining
     }
