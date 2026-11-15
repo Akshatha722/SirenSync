@@ -91,7 +91,7 @@ while True:
         try:
             response = requests.post(
                 f"{API_URL}/api/emergency/start",
-                json={"lane": "North"},
+                json={"lane": detected_lane},
                 timeout=3
             )
 
@@ -116,6 +116,17 @@ while True:
             print("Backend connection error:", error)
 
     # Display emergency status
+    if detected_ambulance:
+        cv2.putText(
+            frame,
+            f"PRIORITY LANE: {detected_lane}",
+            (20, 75),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 0),
+            2
+        )
+
     if detected_ambulance:
         cv2.putText(
             frame,
