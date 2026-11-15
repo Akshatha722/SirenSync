@@ -263,6 +263,40 @@
 <footer>
     SirenSync © 2026 | Smart Emergency Traffic Management
 </footer>
+<div class="history-section" style="
+    margin-top: 30px;
+    padding: 25px;
+    background: #1e293b;
+    border-radius: 12px;
+">
+
+    <h2>📋 Emergency History</h2>
+
+    <table style="
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        color: white;
+    ">
+
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Date & Time</th>
+                <th>Ambulance Lane</th>
+                <th>Previous Signal Lane</th>
+            </tr>
+        </thead>
+
+        <tbody id="historyTable">
+            <tr>
+                <td colspan="4">Loading emergency history...</td>
+            </tr>
+        </tbody>
+
+    </table>
+
+</div>
 
 <script>
 
@@ -371,6 +405,55 @@ async function stopEmergency() {
 
     updateDashboard();
     setInterval(updateDashboard, 2000);
+
+async function loadEmergencyHistory() {
+
+    try {
+        const response = await fetch("/api/emergency/history");
+        const data = await response.json();
+
+        const table = document.getElementById("historyTable");
+
+        table.innerHTML = "";
+
+        if (data.events.length === 0) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4">No emergency records found.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        data.events.forEach(event => {
+
+            const row = document.createElement("tr");
+
+            [
+                event.event,
+                event.date_time,
+                event.ambulance_lane,
+                event.previous_signal_lane
+            ].forEach(value => {
+
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                cell.style.padding = "12px";
+                row.appendChild(cell);
+
+            });
+
+            table.appendChild(row);
+
+        });
+
+    } catch (error) {
+        console.error("History loading error:", error);
+    }
+}
+
+loadEmergencyHistory();
+
 </script>
 
 </body>

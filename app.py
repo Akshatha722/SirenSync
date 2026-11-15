@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -96,7 +97,30 @@ def system_status():
         "remaining_time": remaining,
         "lane_signals": lane_signals
     }
+@app.get("/api/emergency/history")
+def emergency_history():
+    if not os.path.exists(LOG_FILE):
+        return {"events": []}
 
+    with open(LOG_FILE, "r", newline="") as file:
+        reader = csv.DictReader(file)
+        events = list(reader)
+
+    events.reverse()
+
+    return {"events": events}
+
+@app.get("/api/emergency/download")
+def download_emergency_report():
+
+    if not os.path.exists(LOG_FILE):
+        return {"message": "No emergency records available"}
+
+    return FileResponse(
+        path=LOG_FILE,
+        filename="SirenSync_Emergency_Report.csv",
+        media_type="text/csv"
+    )
 
 @app.post("/api/emergency/start")
 def start_emergency(data: EmergencyRequest):
