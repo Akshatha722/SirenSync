@@ -157,6 +157,20 @@
         <p>AI-Powered Emergency Vehicle Priority System</p>
     </div>
 
+    <div id="emergencyAlert" style="
+        display: none;
+        padding: 18px;
+        margin-bottom: 25px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        background: #7f1d1d;
+        color: white;
+        border: 2px solid #ef4444;
+    ">
+        🚨 AMBULANCE DETECTED! EMERGENCY PRIORITY ACTIVE
+    </div>
+
     <div class="cards">
 
         <div class="card">
@@ -307,6 +321,15 @@ async function stopEmergency() {
         document.getElementById("ambulance").textContent =
             data.ambulance_detected ? "Detected" : "Not Detected";
 
+        const emergencyAlert = document.getElementById("emergencyAlert");
+
+        if (data.emergency_active) {
+            emergencyAlert.style.display = "block";
+            emergencyAlert.textContent =
+                "🚨 AMBULANCE DETECTED! PRIORITY LANE: " + data.current_lane;
+        } else {
+            emergencyAlert.style.display = "none";
+        }
         document.getElementById("traffic").textContent =
             data.traffic_signal;
 
