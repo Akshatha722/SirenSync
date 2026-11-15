@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI(
     title="SirenSync",
     description="AI-Powered Smart Traffic Management System",
     version="1.0"
 )
+
+templates = Jinja2Templates(directory="templates")
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,12 +20,12 @@ app.add_middleware(
 
 
 @app.get("/")
-def home():
-    return {
-        "project": "SirenSync",
-        "message": "SirenSync Backend is Running!",
-        "status": "Active"
-    }
+def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={}
+    )
 
 
 @app.get("/api/status")

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SirenSync | Smart Traffic Management</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #101827;
+            color: white;
+        }
+
+        header {
+            background: #182438;
+            padding: 22px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #29374c;
+        }
+
+        header h1 {
+            color: #38bdf8;
+            font-size: 27px;
+        }
+
+        header span {
+            color: #22c55e;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h2 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #94a3b8;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .card h3 {
+            color: #94a3b8;
+            font-size: 15px;
+            margin-bottom: 18px;
+        }
+
+        .value {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #22c55e;
+        }
+
+        .red {
+            color: #ef4444;
+        }
+
+        .blue {
+            color: #38bdf8;
+        }
+
+        .section {
+            margin-top: 30px;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .section h3 {
+            margin-bottom: 20px;
+        }
+
+        .signals {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .signal {
+            background: #101827;
+            padding: 20px;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .light {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin: 10px auto;
+            background: #334155;
+        }
+
+        .active {
+            background: #22c55e;
+            box-shadow: 0 0 15px #22c55e;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 30px;
+        }
+
+        @media(max-width: 750px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚑 SirenSync</h1>
+    <span>● SYSTEM ONLINE</span>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Traffic Management Dashboard</h2>
+        <p>AI-Powered Emergency Vehicle Priority System</p>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>System Status</h3>
+            <div class="value green" id="system">Online</div>
+        </div>
+
+        <div class="card">
+            <h3>Ambulance Detection</h3>
+            <div class="value blue" id="ambulance">Not Detected</div>
+        </div>
+
+        <div class="card">
+            <h3>Traffic Signal</h3>
+            <div class="value green" id="traffic">GREEN</div>
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h3>🚦 Traffic Signal Monitoring</h3>
+
+        <div class="signals">
+
+            <div class="signal">
+                <h4>North Lane</h4>
+                <div class="light" id="north"></div>
+                <p id="northStatus">Waiting</p>
+            </div>
+
+            <div class="signal">
+                <h4>South Lane</h4>
+                <div class="light" id="south"></div>
+                <p id="southStatus">Waiting</p>
+            </div>
+
+            <div class="signal">
+                <h4>East Lane</h4>
+                <div class="light" id="east"></div>
+                <p id="eastStatus">Waiting</p>
+            </div>
+
+            <div class="signal">
+                <h4>West Lane</h4>
+                <div class="light" id="west"></div>
+                <p id="westStatus">Waiting</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>⏱ Signal Information</h3>
+        <p>Current Lane: <span id="lane">North</span></p>
+        <br>
+        <p>Remaining Time: <span id="time">30</span> seconds</p>
+        <br>
+        <p>Emergency Status: <span id="emergency">Inactive</span></p>
+    </div>
+
+</div>
+
+<footer>
+    SirenSync © 2026 | Smart Emergency Traffic Management
+</footer>
+
+<script>
+    async function updateDashboard() {
+        try {
+            const response = await fetch("/api/status");
+            const data = await response.json();
+
+            document.getElementById("system").textContent = data.system;
+            document.getElementById("ambulance").textContent =
+                data.ambulance_detected ? "Detected" : "Not Detected";
+
+            document.getElementById("traffic").textContent =
+                data.traffic_signal;
+
+            document.getElementById("lane").textContent =
+                data.current_lane;
+
+            document.getElementById("time").textContent =
+                data.remaining_time;
+
+            document.getElementById("emergency").textContent =
+                data.emergency_active ? "Active" : "Inactive";
+
+        } catch (error) {
+            document.getElementById("system").textContent = "Offline";
+        }
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 2000);
+</script>
+
+</body>
+</html>
