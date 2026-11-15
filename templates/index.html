@@ -209,6 +209,33 @@
     </div>
 
     <div class="section">
+    <h3>🚑 Emergency Control Panel</h3>
+
+    <label for="ambulanceLane">Select Ambulance Lane:</label>
+
+    <select id="ambulanceLane">
+        <option value="North">North</option>
+        <option value="South">South</option>
+        <option value="East">East</option>
+        <option value="West">West</option>
+    </select>
+
+    <br><br>
+
+    <button onclick="startEmergency()">
+        🚑 START EMERGENCY
+    </button>
+
+    <button onclick="stopEmergency()">
+        🛑 STOP EMERGENCY
+    </button>
+
+    <p id="emergencyMessage" style="margin-top:20px;">
+        No active emergency
+    </p>
+</div>
+
+    <div class="section">
         <h3>⏱ Signal Information</h3>
         <p>Current Lane: <span id="lane">North</span></p>
         <br>
@@ -224,6 +251,52 @@
 </footer>
 
 <script>
+
+    async function startEmergency() {
+    const lane = document.getElementById("ambulanceLane").value;
+
+    try {
+        const response = await fetch("/api/emergency/start", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ lane: lane })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("emergencyMessage").textContent =
+            data.message + (data.priority_lane
+                ? " - Priority Lane: " + data.priority_lane
+                : "");
+
+        await updateDashboard();
+
+    } catch (error) {
+        alert("Unable to activate emergency!");
+    }
+}
+
+
+async function stopEmergency() {
+    try {
+        const response = await fetch("/api/emergency/stop", {
+            method: "POST"
+        });
+
+        const data = await response.json();
+
+        document.getElementById("emergencyMessage").textContent =
+            data.message;
+
+        await updateDashboard();
+
+    } catch (error) {
+        alert("Unable to stop emergency!");
+    }
+}
+
    async function updateDashboard() {
     try {
         const response = await fetch("/api/status");
