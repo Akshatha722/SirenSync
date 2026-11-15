@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import time
+import csv
+import os
+from datetime import datetime
 
 app = FastAPI(
     title="SirenSync",
@@ -27,11 +30,31 @@ start_time = time.monotonic()
 emergency_active = False
 emergency_lane = None
 saved_signal_state = None
+LOG_FILE = "logs/emergency_events.csv"
 
 
 class EmergencyRequest(BaseModel):
     lane: str
+def log_emergency(event_data):
+    os.makedirs("logs", exist_ok=True)
 
+    file_exists = os.path.isfile(LOG_FILE)
+
+    with open(LOG_FILE, "a", newline="") as file:
+        writer = csv.DictWriter(
+            file,
+            fieldnames=[
+                "event",
+                "date_time",
+                "ambulance_lane",
+                "previous_signal_lane"
+            ]
+        )
+
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow(event_data)
 
 def get_normal_signal():
     elapsed = int(time.monotonic() - start_time)
@@ -95,6 +118,12 @@ def start_emergency(data: EmergencyRequest):
     emergency_lane = data.lane
     emergency_active = True
 
+    log_emergency({
+        "event": "EMERGENCY_STARTED",
+        "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ambulance_lane": emergency_lane,
+        "previous_signal_lane": saved_signal_state["lane"]
+    })
     return {
         "message": "Emergency priority activated",
         "priority_lane": emergency_lane,
@@ -113,7 +142,12 @@ def stop_emergency():
 
     saved_lane = saved_signal_state["lane"]
     saved_remaining = saved_signal_state["remaining"]
-
+    log_emergency({
+        "event": "EMERGENCY_STOPPED",
+        "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ambulance_lane": emergency_lane,
+        "previous_signal_lane": saved_lane
+    })
     phase = lanes.index(saved_lane)
 
     elapsed_before_emergency = (
