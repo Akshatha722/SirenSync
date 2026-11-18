@@ -1,5 +1,7 @@
+
 import cv2
 import requests
+import time
 from ultralytics import YOLO
 
 # Load trained ambulance detection model
@@ -21,6 +23,7 @@ print("Press Q to quit")
 emergency_active = False
 detected_frames = 0
 missing_frames = 0
+last_count_update = 0
 
 while True:
 
@@ -35,6 +38,13 @@ while True:
     detected_ambulance = False
     detected_lane = None
 
+    lane_counts = {
+        "North": 0,
+        "South": 0,
+        "East": 0,
+        "West": 0
+    }
+
     # Detect objects
     for result in results:
         for box in result.boxes:
@@ -47,9 +57,29 @@ while True:
 
             x1, y1, x2, y2 = map(int, box.xyxy[0])
 
+            # Count ordinary vehicles in each lane
+            if label == "other_vehicle":
+
+                frame_height, frame_width = frame.shape[:2]
+
+                center_x = (x1 + x2) // 2
+                center_y = (y1 + y2) // 2
+
+                middle_x = frame_width // 2
+                middle_y = frame_height // 2
+
+                if abs(center_x - middle_x) > abs(center_y - middle_y):
+                    vehicle_lane = "West" if center_x < middle_x else "East"
+                else:
+                    vehicle_lane = "North" if center_y < middle_y else "South"
+
+                lane_counts[vehicle_lane] += 1
+
             color = (0, 255, 0)
 
+            # Ambulance detection and lane identification
             if label == "ambulance":
+
                 detected_ambulance = True
                 color = (0, 0, 255)
 
@@ -86,8 +116,29 @@ while True:
         missing_frames += 1
         detected_frames = 0
 
+    # Send traffic counts to backend every 2 seconds
+    if time.time() - last_count_update >= 2:
+
+        for lane, count in lane_counts.items():
+
+            try:
+                requests.post(
+                    f"{API_URL}/api/traffic/count",
+                    json={
+                        "lane": lane,
+                        "count": count
+                    },
+                    timeout=3
+                )
+
+            except requests.RequestException as error:
+                print("Traffic count update error:", error)
+
+        last_count_update = time.time()
+
     # Activate emergency after 3 consecutive detections
     if detected_frames >= 3 and not emergency_active:
+
         try:
             response = requests.post(
                 f"{API_URL}/api/emergency/start",
@@ -103,6 +154,7 @@ while True:
 
     # Restore normal traffic after 10 frames without ambulance
     elif missing_frames >= 10 and emergency_active:
+
         try:
             response = requests.post(
                 f"{API_URL}/api/emergency/stop",
@@ -117,6 +169,7 @@ while True:
 
     # Display emergency status
     if detected_ambulance:
+
         cv2.putText(
             frame,
             f"PRIORITY LANE: {detected_lane}",
@@ -127,7 +180,6 @@ while True:
             2
         )
 
-    if detected_ambulance:
         cv2.putText(
             frame,
             "AMBULANCE DETECTED!",

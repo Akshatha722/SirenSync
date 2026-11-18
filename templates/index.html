@@ -258,6 +258,26 @@
         <p>Emergency Status: <span id="emergency">Inactive</span></p>
     </div>
 
+
+<div class="section">
+    <h3>🚦 Live Traffic Density</h3>
+
+    <div class="density-card">
+        <p>North: <span id="northDensity">LOW</span>
+            (<span id="northCount">0</span> vehicles)</p>
+
+        <p>South: <span id="southDensity">LOW</span>
+            (<span id="southCount">0</span> vehicles)</p>
+
+        <p>East: <span id="eastDensity">LOW</span>
+            (<span id="eastCount">0</span> vehicles)</p>
+
+        <p>West: <span id="westDensity">LOW</span>
+            (<span id="westCount">0</span> vehicles)</p>
+    </div>
+</div>
+
+
 </div>
 
 <div class="history-section" style="
@@ -377,6 +397,22 @@ async function stopEmergency() {
 
         document.getElementById("emergency").textContent =
             data.emergency_active ? "Active" : "Inactive";
+
+        
+// Update live traffic density
+const signalLanes = ["north", "south", "east", "west"];
+
+signalLanes.forEach(lane => {
+
+    const capitalLane =
+        lane.charAt(0).toUpperCase() + lane.slice(1);
+
+    document.getElementById(lane + "Count").textContent =
+        data.traffic_counts[capitalLane];
+
+    document.getElementById(lane + "Density").textContent =
+        data.traffic_density[capitalLane];
+});
 
         // Update all four traffic signals
         const lanes = ["north", "south", "east", "west"];

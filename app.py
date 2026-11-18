@@ -30,12 +30,22 @@ start_time = time.monotonic()
 
 emergency_active = False
 emergency_lane = None
+# Traffic density information
+traffic_counts = {
+    "North": 0,
+    "South": 0,
+    "East": 0,
+    "West": 0
+}
 saved_signal_state = None
 LOG_FILE = "logs/emergency_events.csv"
 
 
 class EmergencyRequest(BaseModel):
     lane: str
+class TrafficCountRequest(BaseModel):
+    lane: str
+    count: int
 def log_emergency(event_data):
     os.makedirs("logs", exist_ok=True)
 
@@ -73,7 +83,31 @@ def home(request: Request):
         context={}
     )
 
+@app.post("/api/traffic/count")
+def update_traffic_count(data: TrafficCountRequest):
 
+    if data.lane not in lanes:
+        return {"error": "Invalid lane"}
+
+    if data.count < 0:
+        return {"error": "Invalid vehicle count"}
+
+    traffic_counts[data.lane] = data.count
+
+    if data.count <= 2:
+        density = "LOW"
+
+    elif data.count <= 5:
+        density = "MEDIUM"
+
+    else:
+        density = "HIGH"
+
+    return {
+        "lane": data.lane,
+        "vehicle_count": data.count,
+        "traffic_density": density
+    }
 @app.get("/api/status")
 def system_status():
     if emergency_active:
@@ -87,6 +121,19 @@ def system_status():
         lane: "GREEN" if lane == current_lane else "RED"
         for lane in lanes
     }
+
+    traffic_density = {}
+
+    for lane, count in traffic_counts.items():
+
+        if count <= 2:
+            traffic_density[lane] = "LOW"
+
+        elif count <= 5:
+            traffic_density[lane] = "MEDIUM"
+
+        else:
+            traffic_density[lane] = "HIGH"
 
     return {
         "system": "Online",
@@ -152,7 +199,9 @@ def start_emergency(data: EmergencyRequest):
         "message": "Emergency priority activated",
         "priority_lane": emergency_lane,
         "signal": "GREEN",
-        "saved_signal": saved_signal_state
+        "saved_signal": saved_signal_state,
+        "traffic_counts": traffic_counts,
+        "traffic_density": traffic_density,
     }
 
 
