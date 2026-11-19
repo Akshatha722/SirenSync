@@ -110,6 +110,15 @@ def get_normal_signal():
 def home(request: Request):
     return templates.TemplateResponse(
         request=request,
+        name="home.html",
+        context={}
+    )
+
+
+@app.get("/dashboard")
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        request=request,
         name="index.html",
         context={}
     )
@@ -149,11 +158,12 @@ def update_traffic_count(data: TrafficCountRequest):
         "green_duration": lane_durations[data.lane]
     }
 @app.get("/api/status")
+@app.get("/api/status")
 def system_status():
+
     if emergency_active:
         current_lane = emergency_lane
         remaining = 0
-
     else:
         current_lane, remaining = get_normal_signal()
 
@@ -175,7 +185,7 @@ def system_status():
         else:
             traffic_density[lane] = "HIGH"
 
-        return {
+    return {
         "system": "Online",
         "ambulance_detected": emergency_active,
         "emergency_active": emergency_active,
