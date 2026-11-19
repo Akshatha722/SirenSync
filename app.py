@@ -79,18 +79,49 @@ def log_emergency(event_data):
             writer.writeheader()
 
         writer.writerow(event_data)
-
+resume_start_time = None
+paused_lane = None
+paused_remaining = 0
 def get_normal_signal():
+
+    global resume_start_time, start_time
+    global paused_lane, paused_remaining
+
+    # Resume the saved lane after an emergency
+    if resume_start_time is not None:
+
+        elapsed_after_resume = time.monotonic() - resume_start_time
+
+        if elapsed_after_resume < paused_remaining:
+            remaining = paused_remaining - elapsed_after_resume
+
+            return paused_lane, max(0, int(remaining))
+
+        # Saved green time has finished.
+        # Continue the normal signal cycle from the next lane.
+        phase_offset = sum(
+            lane_durations[lane]
+            for lane in lanes[:lanes.index(paused_lane)]
+        )
+
+        elapsed_in_lane = (
+            lane_durations[paused_lane] - paused_remaining
+        )
+
+        start_time = resume_start_time - (
+            phase_offset + elapsed_in_lane
+        )
+
+        resume_start_time = None
+        paused_lane = None
+        paused_remaining = 0
 
     elapsed = int(time.monotonic() - start_time)
 
-    # Total duration of one complete signal cycle
     cycle_duration = sum(lane_durations.values())
 
-    # Current position in the signal cycle
     cycle_position = elapsed % cycle_duration
 
-    # Identify the active lane
     for lane in lanes:
 
         duration = lane_durations[lane]
@@ -104,7 +135,6 @@ def get_normal_signal():
         cycle_position -= duration
 
     return lanes[0], lane_durations[lanes[0]]
-
 
 @app.get("/")
 def home(request: Request):
@@ -157,7 +187,7 @@ def update_traffic_count(data: TrafficCountRequest):
         "traffic_density": density,
         "green_duration": lane_durations[data.lane]
     }
-@app.get("/api/status")
+
 @app.get("/api/status")
 def system_status():
 
@@ -223,7 +253,9 @@ def download_emergency_report():
 
 @app.post("/api/emergency/start")
 def start_emergency(data: EmergencyRequest):
-    global emergency_active, emergency_lane, saved_signal_state
+
+    global emergency_active, emergency_lane
+    global saved_signal_state, paused_lane, paused_remaining
 
     if data.lane not in lanes:
         return {"error": "Invalid lane"}
@@ -238,6 +270,9 @@ def start_emergency(data: EmergencyRequest):
         "remaining": remaining
     }
 
+    paused_lane = current_lane
+    paused_remaining = remaining
+
     emergency_lane = data.lane
     emergency_active = True
 
@@ -245,47 +280,45 @@ def start_emergency(data: EmergencyRequest):
         "event": "EMERGENCY_STARTED",
         "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "ambulance_lane": emergency_lane,
-        "previous_signal_lane": saved_signal_state["lane"]
+        "previous_signal_lane": current_lane
     })
+
     return {
-    "message": "Emergency priority activated",
-    "priority_lane": emergency_lane,
-    "signal": "GREEN",
-    "saved_signal": saved_signal_state
+        "message": "Emergency priority activated",
+        "priority_lane": emergency_lane,
+        "signal": "GREEN",
+        "saved_signal": saved_signal_state
     }
 
 @app.post("/api/emergency/stop")
 def stop_emergency():
+
     global emergency_active, emergency_lane
-    global saved_signal_state, start_time
+    global saved_signal_state, resume_start_time
 
     if not emergency_active:
         return {"message": "No emergency is active"}
 
     saved_lane = saved_signal_state["lane"]
     saved_remaining = saved_signal_state["remaining"]
+
     log_emergency({
         "event": "EMERGENCY_STOPPED",
         "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "ambulance_lane": emergency_lane,
         "previous_signal_lane": saved_lane
     })
-    phase_start_offset = sum(
-        lane_durations[lane] for lane in lanes[:lanes.index(saved_lane)]
-    )
 
-    elapsed_in_saved_lane = (
-        lane_durations[saved_lane] - saved_remaining
-    )
+    # Resume the saved lane and its remaining green time
+    resume_start_time = time.monotonic()
 
-    elapsed_before_emergency = (
-        phase_start_offset + elapsed_in_saved_lane
-    )
-
-    start_time = time.monotonic() - elapsed_before_emergency
     emergency_active = False
     emergency_lane = None
     saved_signal_state = None
+    # Signal restoration control
+    paused_lane = None
+    paused_remaining = 0
+    resume_start_time = None
 
     return {
         "message": "Normal traffic signals restored",
