@@ -1,188 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SirenSync | Smart Traffic Management</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+
+    <title>SirenSync | Traffic Command Center</title>
+
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
 </head>
 
 <body>
 
-<header>
-    <h1>🚑 SirenSync</h1>
-    <span>● SYSTEM ONLINE</span>
-</header>
+<div class="dashboard-layout">
 
-<div class="container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-    <div class="welcome">
-        <h2>Traffic Management Dashboard</h2>
-        <p>AI-Powered Emergency Vehicle Priority System</p>
-    </div>
-
-    <div id="emergencyAlert" style="
-        display: none;
-        padding: 18px;
-        margin-bottom: 25px;
-        border-radius: 10px;
-        font-size: 18px;
-        font-weight: bold;
-        background: #7f1d1d;
-        color: white;
-        border: 2px solid #ef4444;
-    ">
-        🚨 AMBULANCE DETECTED! EMERGENCY PRIORITY ACTIVE
-    </div>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>System Status</h3>
-            <div class="value green" id="system">Online</div>
+        <div class="brand">
+            <div class="brand-icon">🚑</div>
+            <div>
+                <h2>SirenSync</h2>
+                <span>TRAFFIC INTELLIGENCE</span>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>Ambulance Detection</h3>
-            <div class="value blue" id="ambulance">Not Detected</div>
+        <div class="nav-heading">MAIN MENU</div>
+
+        <nav class="sidebar-nav">
+            <a href="#overview" class="nav-item active">
+                <span>▦</span> Overview
+            </a>
+
+            <a href="#traffic-monitoring" class="nav-item">
+                <span>🚦</span> Live Traffic
+            </a>
+
+            <a href="#emergency-control" class="nav-item">
+                <span>🚑</span> Emergency Control
+            </a>
+
+            <a href="#traffic-density" class="nav-item">
+                <span>▥</span> Traffic Analytics
+            </a>
+
+            <a href="#emergency-history" class="nav-item">
+                <span>◷</span> Emergency History
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-status">
+                <span class="status-dot"></span>
+                <div>
+                    <strong>System Online</strong>
+                    <small>All services running</small>
+                </div>
+            </div>
+
+            <p>SirenSync © 2026</p>
         </div>
 
-        <div class="card">
-            <h3>Traffic Signal</h3>
-            <div class="value green" id="traffic">GREEN</div>
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div>
+                <h3>Command Center</h3>
+                <p>Intelligent Emergency Traffic Management</p>
+            </div>
+
+            <div class="topbar-right">
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    SYSTEM ONLINE
+                </div>
+            </div>
+
+        </header>
+
+
+        <div class="page-content">
+
+            <!-- OVERVIEW -->
+            <section id="overview">
+
+                <div class="welcome">
+                    <div>
+                        <span class="eyebrow">DASHBOARD OVERVIEW</span>
+                        <h1>Traffic Management Dashboard</h1>
+                        <p>Monitor traffic conditions and manage emergency vehicle priority in real time.</p>
+                    </div>
+                </div>
+
+
+                <!-- EMERGENCY ALERT -->
+                <div id="emergencyAlert" style="display:none;">
+                    🚨 AMBULANCE DETECTED! EMERGENCY PRIORITY ACTIVE
+                </div>
+
+
+                <!-- STATISTICS -->
+                <div class="cards">
+
+                    <div class="card">
+                        <div class="card-top">
+                            <span>System Status</span>
+                            <div class="card-icon cyan">⌘</div>
+                        </div>
+
+                        <div class="value green" id="system">Online</div>
+                        <small>Backend connection</small>
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-top">
+                            <span>Ambulance Detection</span>
+                            <div class="card-icon blue">🚑</div>
+                        </div>
+
+                        <div class="value blue" id="ambulance">Not Detected</div>
+                        <small>AI detection status</small>
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-top">
+                            <span>Traffic Signal</span>
+                            <div class="card-icon green-icon">🚦</div>
+                        </div>
+
+                        <div class="value green" id="traffic">GREEN</div>
+                        <small>Current signal state</small>
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-top">
+                            <span>Emergency Status</span>
+                            <div class="card-icon purple">⚡</div>
+                        </div>
+
+                        <div class="value" id="emergency">Inactive</div>
+                        <small>Emergency priority</small>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- TRAFFIC SIGNAL MONITORING -->
+            <section class="section" id="traffic-monitoring">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">LIVE MONITORING</span>
+                        <h2>Traffic Signal Monitoring</h2>
+                    </div>
+
+                    <span class="live-badge">
+                        <span class="status-dot"></span>
+                        LIVE
+                    </span>
+                </div>
+
+
+                <div class="signals">
+
+                    <div class="signal">
+                        <div class="signal-heading">
+                            <span class="lane-icon">↑</span>
+                            <h4>North Lane</h4>
+                        </div>
+
+                        <div class="light" id="north"></div>
+                        <p id="northStatus">Waiting</p>
+                    </div>
+
+
+                    <div class="signal">
+                        <div class="signal-heading">
+                            <span class="lane-icon">↓</span>
+                            <h4>South Lane</h4>
+                        </div>
+
+                        <div class="light" id="south"></div>
+                        <p id="southStatus">Waiting</p>
+                    </div>
+
+
+                    <div class="signal">
+                        <div class="signal-heading">
+                            <span class="lane-icon">→</span>
+                            <h4>East Lane</h4>
+                        </div>
+
+                        <div class="light" id="east"></div>
+                        <p id="eastStatus">Waiting</p>
+                    </div>
+
+
+                    <div class="signal">
+                        <div class="signal-heading">
+                            <span class="lane-icon">←</span>
+                            <h4>West Lane</h4>
+                        </div>
+
+                        <div class="light" id="west"></div>
+                        <p id="westStatus">Waiting</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- EMERGENCY CONTROL -->
+            <section class="section" id="emergency-control">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">PRIORITY MANAGEMENT</span>
+                        <h2>Emergency Control Center</h2>
+                    </div>
+
+                    <span class="control-badge">MANUAL CONTROL</span>
+                </div>
+
+
+                <div class="emergency-content">
+
+                    <div class="emergency-description">
+                        <div class="emergency-icon">🚑</div>
+
+                        <div>
+                            <h3>Ambulance Priority Control</h3>
+                            <p>Select the approaching ambulance lane to activate emergency signal priority.</p>
+                        </div>
+                    </div>
+
+
+                    <div class="control-form">
+
+                        <div class="input-group">
+                            <label for="ambulanceLane">SELECT AMBULANCE LANE</label>
+
+                            <select id="ambulanceLane">
+                                <option value="North">North Lane</option>
+                                <option value="South">South Lane</option>
+                                <option value="East">East Lane</option>
+                                <option value="West">West Lane</option>
+                            </select>
+                        </div>
+
+
+                        <div class="control-buttons">
+
+                            <button class="start-button" onclick="startEmergency()">
+                                🚑 START EMERGENCY
+                            </button>
+
+                            <button class="stop-button" onclick="stopEmergency()">
+                                ■ STOP EMERGENCY
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="emergency-message">
+                        <span class="status-dot"></span>
+                        <p id="emergencyMessage">No active emergency</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SIGNAL INFORMATION -->
+            <section class="section" id="signal-information">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">SIGNAL STATUS</span>
+                        <h2>Current Signal Information</h2>
+                    </div>
+                </div>
+
+
+                <div class="signal-info-grid">
+
+                    <div class="info-box">
+                        <span>Current Active Lane</span>
+                        <strong id="lane">North</strong>
+                    </div>
+
+                    <div class="info-box">
+                        <span>Remaining Green Time</span>
+                        <strong><span id="time">30</span> seconds</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- TRAFFIC DENSITY -->
+            <section class="section" id="traffic-density">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">TRAFFIC ANALYTICS</span>
+                        <h2>Live Traffic Density</h2>
+                    </div>
+
+                    <span class="live-badge">
+                        <span class="status-dot"></span>
+                        LIVE DATA
+                    </span>
+                </div>
+
+
+                <div class="density-card">
+
+                    <div class="density-item">
+                        <div>
+                            <span class="density-direction">↑</span>
+                            <strong>North</strong>
+                        </div>
+                        <span id="northDensity" class="density-level">LOW</span>
+                        <p><span id="northCount">0</span> vehicles detected</p>
+                    </div>
+
+
+                    <div class="density-item">
+                        <div>
+                            <span class="density-direction">↓</span>
+                            <strong>South</strong>
+                        </div>
+                        <span id="southDensity" class="density-level">LOW</span>
+                        <p><span id="southCount">0</span> vehicles detected</p>
+                    </div>
+
+
+                    <div class="density-item">
+                        <div>
+                            <span class="density-direction">→</span>
+                            <strong>East</strong>
+                        </div>
+                        <span id="eastDensity" class="density-level">LOW</span>
+                        <p><span id="eastCount">0</span> vehicles detected</p>
+                    </div>
+
+
+                    <div class="density-item">
+                        <div>
+                            <span class="density-direction">←</span>
+                            <strong>West</strong>
+                        </div>
+                        <span id="westDensity" class="density-level">LOW</span>
+                        <p><span id="westCount">0</span> vehicles detected</p>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- EMERGENCY HISTORY -->
+            <section class="history-section" id="emergency-history">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">SYSTEM RECORDS</span>
+                        <h2>Emergency Event History</h2>
+                    </div>
+
+                    <span class="control-badge">EVENT LOGS</span>
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date & Time</th>
+                                <th>Ambulance Lane</th>
+                                <th>Previous Signal Lane</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="historyTable">
+                            <tr>
+                                <td colspan="4">Loading emergency history...</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+            <footer>
+                <h3>🚑 SirenSync</h3>
+                <p>Intelligent Emergency Traffic Management System</p>
+                <span>© 2026 SirenSync | AI-Powered Traffic Intelligence</span>
+            </footer>
+
         </div>
 
-    </div>
-
-    <div class="section">
-        <h3>🚦 Traffic Signal Monitoring</h3>
-
-        <div class="signals">
-
-            <div class="signal">
-                <h4>North Lane</h4>
-                <div class="light" id="north"></div>
-                <p id="northStatus">Waiting</p>
-            </div>
-
-            <div class="signal">
-                <h4>South Lane</h4>
-                <div class="light" id="south"></div>
-                <p id="southStatus">Waiting</p>
-            </div>
-
-            <div class="signal">
-                <h4>East Lane</h4>
-                <div class="light" id="east"></div>
-                <p id="eastStatus">Waiting</p>
-            </div>
-
-            <div class="signal">
-                <h4>West Lane</h4>
-                <div class="light" id="west"></div>
-                <p id="westStatus">Waiting</p>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="section">
-    <h3>🚑 Emergency Control Panel</h3>
-
-    <label for="ambulanceLane">Select Ambulance Lane:</label>
-
-    <select id="ambulanceLane">
-        <option value="North">North</option>
-        <option value="South">South</option>
-        <option value="East">East</option>
-        <option value="West">West</option>
-    </select>
-
-    <br><br>
-
-    <button onclick="startEmergency()">
-        🚑 START EMERGENCY
-    </button>
-
-    <button onclick="stopEmergency()">
-        🛑 STOP EMERGENCY
-    </button>
-
-    <p id="emergencyMessage" style="margin-top:20px;">
-        No active emergency
-    </p>
-</div>
-
-    <div class="section">
-        <h3>⏱ Signal Information</h3>
-        <p>Current Lane: <span id="lane">North</span></p>
-        <br>
-        <p>Remaining Time: <span id="time">30</span> seconds</p>
-        <br>
-        <p>Emergency Status: <span id="emergency">Inactive</span></p>
-    </div>
-
-
-<div class="section">
-    <h3>🚦 Live Traffic Density</h3>
-
-    <div class="density-card">
-        <p>North: <span id="northDensity">LOW</span>
-            (<span id="northCount">0</span> vehicles)</p>
-
-        <p>South: <span id="southDensity">LOW</span>
-            (<span id="southCount">0</span> vehicles)</p>
-
-        <p>East: <span id="eastDensity">LOW</span>
-            (<span id="eastCount">0</span> vehicles)</p>
-
-        <p>West: <span id="westDensity">LOW</span>
-            (<span id="westCount">0</span> vehicles)</p>
-    </div>
-</div>
-
+    </main>
 
 </div>
 
-<div class="history-section" style="
-    margin-top: 30px;
-    padding: 25px;
-    background: #1e293b;
-    border-radius: 12px;
-">
-
-    <h2>📋 Emergency History</h2>
-
-    <table style="
-        width: 100%;
-        border-collapse: collapse;
-        text-align: center;
-        color: white;
-    ">
-
-        <thead>
-            <tr>
-                <th>Event</th>
-                <th>Date & Time</th>
-                <th>Ambulance Lane</th>
-                <th>Previous Signal Lane</th>
-            </tr>
-        </thead>
-
-        <tbody id="historyTable">
-            <tr>
-                <td colspan="4">Loading emergency history...</td>
-            </tr>
-        </tbody>
-
-    </table>
-
-</div>
-
-
-<footer>
-    SirenSync © 2026 | Smart Emergency Traffic Management
-</footer>
 
 <script src="/static/js/dashboard.js"></script>
 
