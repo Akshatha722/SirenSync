@@ -1,0 +1,136 @@
+ <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #101827;
+            color: white;
+        }
+
+        header {
+            background: #182438;
+            padding: 22px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #29374c;
+        }
+
+        header h1 {
+            color: #38bdf8;
+            font-size: 27px;
+        }
+
+        header span {
+            color: #22c55e;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h2 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #94a3b8;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .card h3 {
+            color: #94a3b8;
+            font-size: 15px;
+            margin-bottom: 18px;
+        }
+
+        .value {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #22c55e;
+        }
+
+        .red {
+            color: #ef4444;
+        }
+
+        .blue {
+            color: #38bdf8;
+        }
+
+        .section {
+            margin-top: 30px;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .section h3 {
+            margin-bottom: 20px;
+        }
+
+        .signals {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .signal {
+            background: #101827;
+            padding: 20px;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .light {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin: 10px auto;
+            background: #334155;
+        }
+
+        .active {
+            background: #22c55e;
+            box-shadow: 0 0 15px #22c55e;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 30px;
+        }
+
+        @media(max-width: 750px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>

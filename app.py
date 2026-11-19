@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -15,6 +16,7 @@ app = FastAPI(
 )
 
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +27,18 @@ app.add_middleware(
 )
 
 lanes = ["North", "South", "East", "West"]
-signal_duration = 30
+# Adaptive traffic signal timings
+MIN_GREEN_TIME = 15
+NORMAL_GREEN_TIME = 30
+MAX_GREEN_TIME = 45
+
+lane_durations = {
+    "North": 30,
+    "South": 30,
+    "East": 30,
+    "West": 30
+}
+
 start_time = time.monotonic()
 
 emergency_active = False
@@ -68,11 +81,29 @@ def log_emergency(event_data):
         writer.writerow(event_data)
 
 def get_normal_signal():
-    elapsed = int(time.monotonic() - start_time)
-    phase = (elapsed // signal_duration) % 4
-    remaining = signal_duration - (elapsed % signal_duration)
 
-    return lanes[phase], remaining
+    elapsed = int(time.monotonic() - start_time)
+
+    # Total duration of one complete signal cycle
+    cycle_duration = sum(lane_durations.values())
+
+    # Current position in the signal cycle
+    cycle_position = elapsed % cycle_duration
+
+    # Identify the active lane
+    for lane in lanes:
+
+        duration = lane_durations[lane]
+
+        if cycle_position < duration:
+
+            remaining = duration - cycle_position
+
+            return lane, remaining
+
+        cycle_position -= duration
+
+    return lanes[0], lane_durations[lanes[0]]
 
 
 @app.get("/")
@@ -93,20 +124,29 @@ def update_traffic_count(data: TrafficCountRequest):
         return {"error": "Invalid vehicle count"}
 
     traffic_counts[data.lane] = data.count
-
+        # Assign green signal duration based on traffic density
     if data.count <= 2:
         density = "LOW"
+        if not emergency_active:
+            lane_durations[data.lane] = MIN_GREEN_TIME
 
     elif data.count <= 5:
         density = "MEDIUM"
+        if not emergency_active:
+            lane_durations[data.lane] = NORMAL_GREEN_TIME
 
     else:
         density = "HIGH"
+        if not emergency_active:
+            lane_durations[data.lane] = MAX_GREEN_TIME
+
+    
 
     return {
         "lane": data.lane,
         "vehicle_count": data.count,
-        "traffic_density": density
+        "traffic_density": density,
+        "green_duration": lane_durations[data.lane]
     }
 @app.get("/api/status")
 def system_status():
@@ -135,14 +175,16 @@ def system_status():
         else:
             traffic_density[lane] = "HIGH"
 
-    return {
+        return {
         "system": "Online",
         "ambulance_detected": emergency_active,
         "emergency_active": emergency_active,
         "traffic_signal": "GREEN",
         "current_lane": current_lane,
         "remaining_time": remaining,
-        "lane_signals": lane_signals
+        "lane_signals": lane_signals,
+        "traffic_counts": traffic_counts,
+        "traffic_density": traffic_density
     }
 @app.get("/api/emergency/history")
 def emergency_history():
@@ -196,14 +238,11 @@ def start_emergency(data: EmergencyRequest):
         "previous_signal_lane": saved_signal_state["lane"]
     })
     return {
-        "message": "Emergency priority activated",
-        "priority_lane": emergency_lane,
-        "signal": "GREEN",
-        "saved_signal": saved_signal_state,
-        "traffic_counts": traffic_counts,
-        "traffic_density": traffic_density,
+    "message": "Emergency priority activated",
+    "priority_lane": emergency_lane,
+    "signal": "GREEN",
+    "saved_signal": saved_signal_state
     }
-
 
 @app.post("/api/emergency/stop")
 def stop_emergency():
@@ -221,16 +260,19 @@ def stop_emergency():
         "ambulance_lane": emergency_lane,
         "previous_signal_lane": saved_lane
     })
-    phase = lanes.index(saved_lane)
+    phase_start_offset = sum(
+        lane_durations[lane] for lane in lanes[:lanes.index(saved_lane)]
+    )
+
+    elapsed_in_saved_lane = (
+        lane_durations[saved_lane] - saved_remaining
+    )
 
     elapsed_before_emergency = (
-        phase * signal_duration
-        + signal_duration
-        - saved_remaining
+        phase_start_offset + elapsed_in_saved_lane
     )
 
     start_time = time.monotonic() - elapsed_before_emergency
-
     emergency_active = False
     emergency_lane = None
     saved_signal_state = None
