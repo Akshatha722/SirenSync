@@ -1,0 +1,10 @@
+path: C:/Users/aksha/OneDrive/Documents/Mini_Project/SirenSync/datasets/ambulance_dataset
+
+train: images/train
+val: images/val
+
+nc: 2
+
+names:
+  0: ambulance
+  1: other_vehicle

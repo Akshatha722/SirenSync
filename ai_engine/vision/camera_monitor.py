@@ -5,7 +5,10 @@ import time
 from ultralytics import YOLO
 
 # Load trained ambulance detection model
-model = YOLO("models/ambulance_best.pt")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+model = YOLO(str(BASE_DIR / "models" / "ambulance_best.pt"))
 
 # FastAPI backend URL
 API_URL = "http://127.0.0.1:8000"

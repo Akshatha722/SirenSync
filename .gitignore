@@ -1,7 +1,26 @@
+# Python virtual environment
 .venv/
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*.cache
+
+# Environment variables
 .env
+
+# VS Code
 .vscode/
+
+# Test cache
+.pytest_cache/
+
+# YOLO training outputs
+runs/
+
+# Temporary uploads
 uploads/*
+
+# Log files
 logs/*
+!logs/.gitkeep

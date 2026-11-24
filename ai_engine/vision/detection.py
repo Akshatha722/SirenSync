@@ -3,7 +3,10 @@ from ultralytics import YOLO
 
 # Load lightweight YOLOv8 model
 print("Loading YOLO model...")
-model = YOLO("yolov8n.pt")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+model = YOLO(str(BASE_DIR / "models" / "yolov8n.pt"))
 
 print("YOLO model loaded successfully!")
 

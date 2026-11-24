@@ -1,7 +1,11 @@
 import cv2
 from ultralytics import YOLO
 
-model = YOLO("runs/detect/train-2/weights/best.pt")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+
+model = YOLO(str(BASE_DIR / "runs" / "detect" / "train-2" / "weights" / "best.pt"))
 
 camera = cv2.VideoCapture(0)
 

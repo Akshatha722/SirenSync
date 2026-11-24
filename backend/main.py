@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,8 +16,17 @@ app = FastAPI(
     version="1.0"
 )
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+templates = Jinja2Templates(
+    directory=str(BASE_DIR / "frontend" / "templates")
+)
+
+app.mount(
+    "/static",
+    StaticFiles(directory=str(BASE_DIR / "frontend" / "static")),
+    name="static"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,7 +61,7 @@ traffic_counts = {
     "West": 0
 }
 saved_signal_state = None
-LOG_FILE = "logs/emergency_events.csv"
+LOG_FILE = str(BASE_DIR / "logs" / "emergency_events.csv")
 
 
 class EmergencyRequest(BaseModel):
